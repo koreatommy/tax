@@ -7,14 +7,15 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Plus, Eye, Edit, Trash2, FileText, X } from 'lucide-react'
+import { Search, Plus, Trash2, FileText, X, Eye } from 'lucide-react'
 import { toast } from 'sonner'
-import { format, startOfMonth, endOfMonth } from 'date-fns'
+import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
+import { Payment } from '@/types'
 
 export function PaymentList() {
-  const [payments, setPayments] = useState<any[]>([])
+  const [payments, setPayments] = useState<(Payment & { payee?: { name: string, business_type: string } })[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [searchName, setSearchName] = useState('')

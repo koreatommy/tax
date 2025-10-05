@@ -11,19 +11,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
 import { Search, ChevronLeft, ChevronRight, Check } from 'lucide-react'
+import { Payment, Payee } from '@/types'
 
 interface PaymentFormProps {
-  payment?: any
+  payment?: Payment
   onSuccess?: () => void
 }
 
 export function PaymentForm({ payment, onSuccess }: PaymentFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [payees, setPayees] = useState<any[]>([])
+  const [payees, setPayees] = useState<Payee[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [selectedPayee, setSelectedPayee] = useState<any>(null)
+  const [selectedPayee, setSelectedPayee] = useState<Payee | null>(null)
   const itemsPerPage = 10
 
   const [formData, setFormData] = useState({
@@ -42,11 +43,11 @@ export function PaymentForm({ payment, onSuccess }: PaymentFormProps) {
 
   useEffect(() => {
     fetchPayees()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (formData.payment_amount) {
-      const amount = parseFloat(formData.payment_amount)
+      const amount = typeof formData.payment_amount === 'string' ? parseFloat(formData.payment_amount) : formData.payment_amount
       if (!isNaN(amount)) {
         const incomeTax = Math.round(amount * 0.03)
         const localIncomeTax = Math.round(amount * 0.003)
@@ -63,12 +64,12 @@ export function PaymentForm({ payment, onSuccess }: PaymentFormProps) {
       const res = await fetch('/api/payees')
       const result = await res.json()
       if (result.data) {
-        const activePayees = result.data.filter((p: any) => p.is_active)
+        const activePayees = result.data.filter((p: Payee) => p.is_active)
         setPayees(activePayees)
         
         // 수정 모드일 경우 선택된 대상자 설정
         if (payment?.payee_id) {
-          const preSelected = activePayees.find((p: any) => p.id === payment.payee_id)
+          const preSelected = activePayees.find((p: Payee) => p.id === payment.payee_id)
           setSelectedPayee(preSelected)
         }
       }
@@ -94,7 +95,7 @@ export function PaymentForm({ payment, onSuccess }: PaymentFormProps) {
     setCurrentPage(1)
   }, [searchTerm])
 
-  const handleSelectPayee = (payee: any) => {
+  const handleSelectPayee = (payee: Payee) => {
     setSelectedPayee(payee)
     setFormData({ ...formData, payee_id: payee.id })
   }
@@ -344,7 +345,7 @@ export function PaymentForm({ payment, onSuccess }: PaymentFormProps) {
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">지급액</span>
-                  <span className="font-medium">{formatCurrency(parseFloat(formData.payment_amount))}</span>
+                  <span className="font-medium">{formatCurrency(typeof formData.payment_amount === 'string' ? parseFloat(formData.payment_amount) : formData.payment_amount)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">소득세 (3%)</span>

@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Building, Save } from 'lucide-react'
 import { toast } from 'sonner'
+import { Company } from '@/types'
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false)
-  const [company, setCompany] = useState<any>(null)
+  const [company, setCompany] = useState<Company | null>(null)
   const [formData, setFormData] = useState({
     business_number: '',
     company_name: '',

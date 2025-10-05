@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { LogIn, Mail, Lock } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()

@@ -37,7 +37,7 @@ interface PageProps {
 }
 
 export default async function PaymentDetailPage({ params }: PageProps) {
-  const { id } = await params
+  const { } = await params
   // TODO: Supabase에서 데이터 가져오기
   const payment = TEMP_PAYMENT
 

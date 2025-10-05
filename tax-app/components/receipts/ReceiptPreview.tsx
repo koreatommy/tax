@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Download, Mail, Eye } from 'lucide-react'
+import { Download, Mail } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Users, Mail, Calendar, Building2, Eye, Trash2, Edit, RefreshCw } from 'lucide-react'
+import { Mail, Calendar, Building2, Eye, Trash2, Edit, RefreshCw } from 'lucide-react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { toast } from 'sonner'
@@ -57,8 +57,7 @@ export default function AdminUsersPage() {
       if (result.data) {
         setUsers(result.data)
       }
-    } catch (error) {
-      console.error('Users fetch error:', error)
+    } catch {
       toast.error('사용자 목록을 불러오는데 실패했습니다')
     } finally {
       setLoading(false)
@@ -104,7 +103,7 @@ export default function AdminUsersPage() {
         const data = await res.json()
         toast.error(data.error || '수정에 실패했습니다')
       }
-    } catch (error) {
+    } catch {
       toast.error('수정 중 오류가 발생했습니다')
     }
   }
@@ -130,7 +129,7 @@ export default function AdminUsersPage() {
         const data = await res.json()
         toast.error(data.error || '삭제에 실패했습니다')
       }
-    } catch (error) {
+    } catch {
       toast.error('삭제 중 오류가 발생했습니다')
     }
   }

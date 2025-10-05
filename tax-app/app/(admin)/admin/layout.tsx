@@ -66,7 +66,7 @@ export default function AdminLayout({
       
       toast.success('로그아웃되었습니다')
       router.push('/login')
-    } catch (error) {
+    } catch {
       toast.error('로그아웃 실패')
     }
   }

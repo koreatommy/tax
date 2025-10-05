@@ -2,7 +2,19 @@
  * 원천징수 관리 시스템 공통 타입 정의
  */
 
-import { Company, Payee, Payment, Receipt } from './database'
+import type {
+  Company,
+  Payee,
+  Payment,
+  Receipt
+} from './database'
+
+export type {
+  Company,
+  Payee,
+  Payment,
+  Receipt
+}
 
 // ============================
 // 사업자 유형

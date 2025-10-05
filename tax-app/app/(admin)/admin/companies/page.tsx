@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
-import { Building2, Search, Users, CreditCard, FileText } from 'lucide-react'
+import { Search, Users, CreditCard, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
+import { Company } from '@/types'
 
 export default function AdminCompaniesPage() {
-  const [companies, setCompanies] = useState<any[]>([])
+  const [companies, setCompanies] = useState<(Company & { payees?: Array<{ count: number }>, payments?: Array<{ count: number }>, receipts?: Array<{ count: number }> })[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
@@ -111,7 +112,7 @@ export default function AdminCompaniesPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">
-                        {format(new Date(company.created_at), 'yyyy-MM-dd', { locale: ko })}
+                        {company.created_at ? format(new Date(company.created_at), 'yyyy-MM-dd', { locale: ko }) : '-'}
                       </TableCell>
                     </TableRow>
                   ))}

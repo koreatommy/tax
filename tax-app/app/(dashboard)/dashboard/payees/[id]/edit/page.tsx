@@ -16,15 +16,20 @@ export default async function EditPayeePage({ params }: PageProps) {
   const payee = {
     id,
     name: '김철수',
-    residentNumber: '900101-1234567',
+    resident_number_encrypted: '900101-1234567',
     address: '서울특별시 강남구 테헤란로 123',
     contact: '010-1234-5678',
     email: 'kim@example.com',
-    bankName: 'KB국민은행',
-    accountNumber: '1234-56-7890123',
-    businessType: 'FREELANCER' as const,
-    contractStartDate: '2024-01-01',
-    contractEndDate: '2024-12-31',
+    bank_name: 'KB국민은행',
+    account_number_encrypted: '1234-56-7890123',
+    business_type: 'FREELANCER',
+    company_id: 'temp-company-id',
+    contract_start_date: '2024-01-01',
+    contract_end_date: '2024-12-31',
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: null,
+    contract_file_url: null
   }
 
   return (
@@ -50,7 +55,7 @@ export default async function EditPayeePage({ params }: PageProps) {
           <CardTitle>기본 정보</CardTitle>
         </CardHeader>
         <CardContent>
-          <PayeeForm defaultValues={payee} />
+          <PayeeForm payee={payee} />
         </CardContent>
       </Card>
     </div>

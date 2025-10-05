@@ -12,9 +12,10 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
+import { Receipt } from '@/types'
 
 export function ReceiptList() {
-  const [receipts, setReceipts] = useState<any[]>([])
+  const [receipts, setReceipts] = useState<(Receipt & { payment?: { payment_date: string, payment_reason?: string, payment_amount: number, net_amount: number }, payee?: { name: string, business_type: string } })[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [searchName, setSearchName] = useState('')
@@ -207,7 +208,7 @@ export function ReceiptList() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {format(new Date(receipt.payment?.payment_date), 'yyyy-MM-dd', { locale: ko })}
+                    {receipt.payment?.payment_date ? format(new Date(receipt.payment.payment_date), 'yyyy-MM-dd', { locale: ko }) : '-'}
                   </TableCell>
                   <TableCell>
                     <div className="max-w-[200px] truncate" title={receipt.payment?.payment_reason || '-'}>
@@ -215,10 +216,10 @@ export function ReceiptList() {
                     </div>
                   </TableCell>
                   <TableCell className="font-mono">
-                    {formatCurrency(receipt.payment?.payment_amount)}
+                    {formatCurrency(receipt.payment?.payment_amount || 0)}
                   </TableCell>
                   <TableCell className="font-mono font-semibold">
-                    {formatCurrency(receipt.payment?.net_amount)}
+                    {formatCurrency(receipt.payment?.net_amount || 0)}
                   </TableCell>
                   <TableCell>
                     {receipt.email_sent ? (
@@ -228,7 +229,7 @@ export function ReceiptList() {
                     )}
                   </TableCell>
                   <TableCell className="text-sm text-gray-600 dark:text-gray-400">
-                    {format(new Date(receipt.created_at), 'yyyy-MM-dd HH:mm', { locale: ko })}
+                    {receipt.created_at ? format(new Date(receipt.created_at), 'yyyy-MM-dd HH:mm', { locale: ko }) : '-'}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

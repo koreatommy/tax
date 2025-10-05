@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, CreditCard, FileText, TrendingUp } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
+import { Payment } from '@/types'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -34,8 +35,8 @@ export default function DashboardPage() {
       ])
 
       const payments = paymentsData.data || []
-      const totalAmount = payments.reduce((sum: number, p: any) => sum + parseFloat(p.payment_amount || 0), 0)
-      const totalTax = payments.reduce((sum: number, p: any) => sum + parseFloat(p.total_tax || 0), 0)
+      const totalAmount = payments.reduce((sum: number, p: Payment) => sum + (p.payment_amount || 0), 0)
+      const totalTax = payments.reduce((sum: number, p: Payment) => sum + (p.total_tax || 0), 0)
 
       setStats({
         payees: payeesData.data?.length || 0,

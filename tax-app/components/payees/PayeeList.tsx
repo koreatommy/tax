@@ -10,9 +10,10 @@ import { Search, Plus, Eye, Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
+import { Payee } from '@/types'
 
 export function PayeeList() {
-  const [payees, setPayees] = useState<any[]>([])
+  const [payees, setPayees] = useState<Payee[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
@@ -108,7 +109,7 @@ export function PayeeList() {
                 <TableRow key={payee.id}>
                   <TableCell className="font-medium">{payee.name}</TableCell>
                   <TableCell className="font-mono text-sm">
-                    {payee.resident_number}
+                    {payee.resident_number_encrypted}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">{payee.business_type}</Badge>
@@ -122,7 +123,7 @@ export function PayeeList() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(payee.created_at), 'yyyy-MM-dd', { locale: ko })}
+                    {payee.created_at ? format(new Date(payee.created_at), 'yyyy-MM-dd', { locale: ko }) : '-'}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

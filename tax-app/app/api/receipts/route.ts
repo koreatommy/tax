@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 /**
  * GET /api/receipts - 영수증 목록 조회
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient()
     
