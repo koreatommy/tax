@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 import { decrypt, maskResidentNumber } from '@/lib/utils/encryption'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(
   request: NextRequest,
@@ -92,7 +89,10 @@ export async function POST(
       companyAddress: receipt.company.address,
     })
 
-    // 이메일 발송
+    // Resend API를 사용한 이메일 발송
+    const { Resend } = await import('resend')
+    const resend = new Resend(process.env.RESEND_API_KEY)
+
     const { data, error: emailError } = await resend.emails.send({
       from: 'noreply@tax-receipt.com', // 도메인 설정 필요
       to: [email],
