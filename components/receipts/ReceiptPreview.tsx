@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Download, Mail } from 'lucide-react'
@@ -7,6 +8,7 @@ import { formatCurrency } from '@/lib/utils/tax-calculator'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { downloadReceiptPDF } from '@/lib/pdf/receipt-generator'
+import { EmailSendDialog } from './EmailSendDialog'
 import { toast } from 'sonner'
 
 interface ReceiptPreviewProps {
@@ -30,6 +32,8 @@ interface ReceiptPreviewProps {
 }
 
 export function ReceiptPreview({ receiptData }: ReceiptPreviewProps) {
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false)
+
   const handleDownload = () => {
     try {
       downloadReceiptPDF(receiptData)
@@ -41,7 +45,7 @@ export function ReceiptPreview({ receiptData }: ReceiptPreviewProps) {
   }
 
   const handleSendEmail = () => {
-    toast.info('이메일 발송 기능은 준비 중입니다')
+    setEmailDialogOpen(true)
   }
 
   return (
@@ -170,13 +174,21 @@ export function ReceiptPreview({ receiptData }: ReceiptPreviewProps) {
             </div>
           </div>
 
-          {/* 하단 안내문 */}
-          <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-700">
-            본 영수증은 소득세법에 의거하여 발급되었습니다.
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
+             {/* 하단 안내문 */}
+             <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-700">
+               본 영수증은 소득세법에 의거하여 발급되었습니다.
+             </div>
+           </CardContent>
+         </Card>
+
+         {/* 이메일 발송 다이얼로그 */}
+         <EmailSendDialog
+           open={emailDialogOpen}
+           onOpenChange={setEmailDialogOpen}
+           receiptId={receiptData.receiptNumber}
+           payeeName={receiptData.payeeName}
+         />
+       </div>
+     )
+   }
 
