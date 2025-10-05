@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd tax-app && npm run build",
-  "outputDirectory": "tax-app/.next",
-  "installCommand": "cd tax-app && npm install",
   "framework": "nextjs",
-  "rootDirectory": "tax-app"
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "regions": ["icn1"]
 }
