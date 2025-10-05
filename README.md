@@ -328,5 +328,6 @@ npm run start
 
 **개발 상태**: ✅ MVP 완료 (90%)  
 **버전**: 1.0.0  
-**최종 업데이트**: 2025-10-03
+**배포 URL**: https://tax-kpmplhvnu-eugene-lees-projects-87cd559d.vercel.app  
+**최종 업데이트**: 2025-10-05
 
