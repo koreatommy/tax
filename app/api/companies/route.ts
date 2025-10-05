@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { validateBusinessNumber } from '@/lib/utils/validators'
 
 /**
  * GET /api/companies - 회사 정보 조회
@@ -165,6 +166,7 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     const {
+      business_number,
       company_name,
       representative_name,
       address,
@@ -172,9 +174,55 @@ export async function PUT(request: NextRequest) {
       email,
     } = body
 
+    // 필수 필드 검증
+    if (!business_number || !company_name || !representative_name) {
+      return NextResponse.json(
+        { error: 'Missing required fields', details: { business_number: !!business_number, company_name: !!company_name, representative_name: !!representative_name } },
+        { status: 400 }
+      )
+    }
+
+    // 사업자등록번호 유효성 검증
+    if (!validateBusinessNumber(business_number)) {
+      return NextResponse.json(
+        { error: 'Invalid business number format' },
+        { status: 400 }
+      )
+    }
+
+    // 현재 회사의 기존 사업자등록번호 조회
+    const { data: currentCompany } = await supabase
+      .from('companies')
+      .select('business_number')
+      .eq('user_id', user.id)
+      .single()
+
+    // 사업자등록번호가 변경된 경우에만 중복 체크
+    if (!currentCompany || currentCompany.business_number !== business_number) {
+      // 중복 확인
+      const { data: existing, error: checkError } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('business_number', business_number)
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116은 "no rows returned" 에러
+        console.error('중복 확인 중 에러:', checkError)
+        return NextResponse.json({ error: 'Database error during duplicate check', details: checkError.message }, { status: 500 })
+      }
+
+      if (existing) {
+        return NextResponse.json(
+          { error: 'Company with this business number already exists' },
+          { status: 409 }
+        )
+      }
+    }
+
     const { data: company, error } = await supabase
       .from('companies')
       .update({
+        business_number,
         company_name,
         representative_name,
         address,

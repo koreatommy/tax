@@ -10,10 +10,10 @@ import { Search, Plus, Eye, Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
-import { Payee } from '@/types'
+import { PayeeWithDecrypted } from '@/types'
 
 export function PayeeList() {
-  const [payees, setPayees] = useState<Payee[]>([])
+  const [payees, setPayees] = useState<PayeeWithDecrypted[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
@@ -109,7 +109,7 @@ export function PayeeList() {
                 <TableRow key={payee.id}>
                   <TableCell className="font-medium">{payee.name}</TableCell>
                   <TableCell className="font-mono text-sm">
-                    {payee.resident_number_encrypted}
+                    {payee.resident_number}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">{payee.business_type}</Badge>

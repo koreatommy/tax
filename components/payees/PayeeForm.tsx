@@ -8,12 +8,12 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { BANKS, Payee } from '@/types'
+import { BANKS, PayeeWithDecrypted } from '@/types'
 
 const BUSINESS_TYPES = ['프리랜서', '강사', '외주직원', '컨설턴트', '기타']
 
 interface PayeeFormProps {
-  payee?: Payee
+  payee?: PayeeWithDecrypted
   onSuccess?: () => void
 }
 
@@ -22,12 +22,12 @@ export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: payee?.name || '',
-    resident_number: '',
+    resident_number: payee?.resident_number || '',
     address: payee?.address || '',
     contact: payee?.contact || '',
     email: payee?.email || '',
     bank_name: payee?.bank_name || '',
-    account_number: '',
+    account_number: payee?.account_number || '',
     business_type: payee?.business_type || '',
     contract_start_date: payee?.contract_start_date || '',
     contract_end_date: payee?.contract_end_date || '',

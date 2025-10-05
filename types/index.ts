@@ -60,6 +60,14 @@ export type Bank = (typeof BANKS)[number]
 // ============================
 
 /**
+ * 복호화된 대상자 정보 (UI에서 사용)
+ */
+export interface PayeeWithDecrypted extends Payee {
+  resident_number?: string  // 복호화된 주민번호
+  account_number?: string   // 복호화된 계좌번호
+}
+
+/**
  * 대상자 + 회사 정보
  */
 export interface PayeeWithCompany extends Payee {

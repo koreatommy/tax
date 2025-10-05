@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/constants'
+import { createClient } from '@/lib/supabase/server'
+import { decrypt } from '@/lib/utils/encryption'
+import { notFound, redirect } from 'next/navigation'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -11,25 +14,57 @@ interface PageProps {
 
 export default async function EditPayeePage({ params }: PageProps) {
   const { id } = await params
+  const supabase = await createClient()
   
-  // TODO: Supabase에서 데이터 가져오기
+  // 인증 확인
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    redirect('/login')
+  }
+
+  // 지급 대상자 조회
+  const { data: payeeData, error } = await supabase
+    .from('payees')
+    .select(`
+      *,
+      company:companies!inner(user_id)
+    `)
+    .eq('id', id)
+    .single()
+
+  if (error || !payeeData) {
+    notFound()
+  }
+
+  // 권한 확인 (자신의 회사 소속인지)
+  if (payeeData.company.user_id !== user.id) {
+    notFound()
+  }
+
+  // 주민번호 복호화
+  let residentNumber = ''
+  let accountNumber = null
+  
+  if (payeeData.resident_number_encrypted?.startsWith('ENCRYPTED_')) {
+    residentNumber = payeeData.resident_number_encrypted.replace('ENCRYPTED_', '')
+  } else if (payeeData.resident_number_encrypted?.startsWith('ENC_')) {
+    residentNumber = payeeData.resident_number_encrypted.replace('ENC_', '')
+  } else {
+    residentNumber = decrypt(payeeData.resident_number_encrypted)
+  }
+  
+  if (payeeData.account_number_encrypted?.startsWith('ENCRYPTED_')) {
+    accountNumber = payeeData.account_number_encrypted.replace('ENCRYPTED_', '')
+  } else if (payeeData.account_number_encrypted?.startsWith('ENC_')) {
+    accountNumber = payeeData.account_number_encrypted.replace('ENC_', '')
+  } else if (payeeData.account_number_encrypted) {
+    accountNumber = decrypt(payeeData.account_number_encrypted)
+  }
+
   const payee = {
-    id,
-    name: '김철수',
-    resident_number_encrypted: '900101-1234567',
-    address: '서울특별시 강남구 테헤란로 123',
-    contact: '010-1234-5678',
-    email: 'kim@example.com',
-    bank_name: 'KB국민은행',
-    account_number_encrypted: '1234-56-7890123',
-    business_type: 'FREELANCER',
-    company_id: 'temp-company-id',
-    contract_start_date: '2024-01-01',
-    contract_end_date: '2024-12-31',
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: null,
-    contract_file_url: null
+    ...payeeData,
+    resident_number: residentNumber,
+    account_number: accountNumber,
   }
 
   return (

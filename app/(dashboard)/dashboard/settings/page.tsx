@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Building, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { Company } from '@/types'
+import { validateBusinessNumber, formatBusinessNumber } from '@/lib/utils/validators'
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false)
@@ -40,6 +41,13 @@ export default function SettingsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // 사업자등록번호 유효성 검증
+    if (!validateBusinessNumber(formData.business_number)) {
+      toast.error('올바른 사업자등록번호 형식을 입력해주세요 (예: 123-45-67890)')
+      return
+    }
+    
     setLoading(true)
 
     try {
@@ -70,7 +78,19 @@ export default function SettingsPage() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    let value = e.target.value
+    
+    // 사업자등록번호 필드인 경우 포맷팅 적용
+    if (e.target.name === 'business_number') {
+      // 숫자만 추출
+      const numbers = value.replace(/\D/g, '')
+      // 10자리까지만 허용
+      const limitedNumbers = numbers.slice(0, 10)
+      // 포맷팅 적용
+      value = formatBusinessNumber(limitedNumbers)
+    }
+    
+    setFormData({ ...formData, [e.target.name]: value })
   }
 
   return (
@@ -106,7 +126,6 @@ export default function SettingsPage() {
                   value={formData.business_number}
                   onChange={handleChange}
                   required
-                  disabled={!!company}
                 />
               </div>
               <div className="space-y-2">
