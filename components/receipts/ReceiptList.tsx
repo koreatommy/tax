@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Eye, Download, Mail, Search, X } from 'lucide-react'
+import { Eye, Download, Mail, Search, X, FileSpreadsheet } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
@@ -20,6 +20,7 @@ export function ReceiptList() {
   const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [searchName, setSearchName] = useState('')
   const [searchReason, setSearchReason] = useState('')
+  const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
     fetchReceipts()
@@ -97,6 +98,54 @@ export function ReceiptList() {
     setSearchReason('')
   }
 
+  // 엑셀 다운로드 함수
+  const handleExcelDownload = async () => {
+    if (filteredReceipts.length === 0) {
+      toast.error('다운로드할 데이터가 없습니다')
+      return
+    }
+
+    setIsDownloading(true)
+    try {
+      const response = await fetch('/api/receipts/export')
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || '다운로드 실패')
+      }
+
+      // 파일 다운로드
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // Content-Disposition 헤더에서 파일명 추출
+      const contentDisposition = response.headers.get('content-disposition')
+      let fileName = `원천징수영수증_${new Date().toISOString().split('T')[0]}.xlsx`
+      
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="(.+)"/)
+        if (fileNameMatch) {
+          fileName = decodeURIComponent(fileNameMatch[1])
+        }
+      }
+      
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('엑셀 파일이 다운로드되었습니다')
+    } catch (error) {
+      console.error('엑셀 다운로드 오류:', error)
+      toast.error(error instanceof Error ? error.message : '다운로드 실패')
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
   const hasActiveFilters = selectedMonth !== 'all' || searchName !== '' || searchReason !== ''
 
   if (loading) {
@@ -106,8 +155,22 @@ export function ReceiptList() {
   return (
     <div className="space-y-4">
       {/* 헤더 */}
-      <div className="text-sm text-gray-600 dark:text-gray-400">
-        총 {filteredReceipts.length}건의 영수증 {receipts.length !== filteredReceipts.length && `(전체 ${receipts.length}건)`}
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          총 {filteredReceipts.length}건의 영수증 {receipts.length !== filteredReceipts.length && `(전체 ${receipts.length}건)`}
+        </div>
+        
+        {/* 엑셀 다운로드 버튼 */}
+        {filteredReceipts.length > 0 && (
+          <Button 
+            onClick={handleExcelDownload}
+            disabled={isDownloading}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            <FileSpreadsheet className="h-4 w-4 mr-2" />
+            {isDownloading ? '다운로드 중...' : '엑셀 다운로드'}
+          </Button>
+        )}
       </div>
 
       {/* 필터 영역 */}
