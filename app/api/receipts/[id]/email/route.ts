@@ -13,6 +13,8 @@ export async function POST(
     const { id } = await params
     const { email } = await request.json()
 
+    console.log('🔍 Email API 호출:', { id, email })
+
     if (!email) {
       return NextResponse.json(
         { success: false, error: '이메일 주소가 필요합니다' },
@@ -24,6 +26,8 @@ export async function POST(
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
+    console.log('👤 사용자 인증:', { user: user?.id, authError })
+    
     if (authError || !user) {
       return NextResponse.json(
         { success: false, error: '인증이 필요합니다' },
@@ -32,6 +36,8 @@ export async function POST(
     }
 
     // 영수증 데이터 조회
+    console.log('📄 영수증 조회 시작:', { receiptId: id, userId: user.id })
+    
     const { data: receipt, error } = await supabase
       .from('receipts')
       .select(`
@@ -43,7 +49,13 @@ export async function POST(
       .eq('id', id)
       .single()
 
+    console.log('📄 영수증 조회 결과:', { 
+      receipt: receipt ? { id: receipt.id, receipt_number: receipt.receipt_number } : null, 
+      error: error?.message 
+    })
+
     if (error || !receipt) {
+      console.error('❌ 영수증 조회 실패:', error)
       return NextResponse.json(
         { success: false, error: '영수증을 찾을 수 없습니다' },
         { status: 404 }
@@ -51,6 +63,12 @@ export async function POST(
     }
 
     // 권한 확인
+    console.log('🔐 권한 확인:', { 
+      receiptUserId: receipt.company.user_id, 
+      currentUserId: user.id,
+      hasAccess: receipt.company.user_id === user.id 
+    })
+    
     if (receipt.company.user_id !== user.id) {
       return NextResponse.json(
         { success: false, error: '권한이 없습니다' },
@@ -89,19 +107,23 @@ export async function POST(
       companyAddress: receipt.company.address,
     })
 
+    console.log('📧 이메일 발송 시작:', { to: email })
+
     // Resend API를 사용한 이메일 발송
     const { Resend } = await import('resend')
     const resend = new Resend(process.env.RESEND_API_KEY)
 
     const { data, error: emailError } = await resend.emails.send({
-      from: 'noreply@tax-receipt.com', // 도메인 설정 필요
+      from: 'Tax Receipt System <onboarding@resend.dev>', // Resend 기본 도메인 사용
       to: [email],
       subject: `[원천징수영수증] ${receipt.receipt_number} - ${receipt.payee.name}`,
       html: emailHtml,
     })
 
+    console.log('📧 이메일 발송 결과:', { data, emailError })
+
     if (emailError) {
-      console.error('Email sending error:', emailError)
+      console.error('❌ 이메일 발송 에러:', emailError)
       return NextResponse.json(
         { success: false, error: '이메일 발송에 실패했습니다' },
         { status: 500 }
@@ -117,6 +139,8 @@ export async function POST(
       })
       .eq('id', id)
 
+    console.log('✅ 이메일 발송 완료:', { messageId: data?.id })
+
     return NextResponse.json({
       success: true,
       data: { messageId: data?.id },
@@ -124,7 +148,7 @@ export async function POST(
     })
 
   } catch (error) {
-    console.error('Email API error:', error)
+    console.error('❌ Email API 에러:', error)
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다' },
       { status: 500 }

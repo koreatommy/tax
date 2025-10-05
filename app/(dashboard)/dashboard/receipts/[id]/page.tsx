@@ -76,6 +76,7 @@ export default async function ReceiptDetailPage({ params }: PageProps) {
 
   // 영수증 미리보기용 데이터 변환
   const receiptData = {
+    receiptId: receipt.id, // 실제 UUID 추가
     receiptNumber: receipt.receipt_number,
     paymentDate: receipt.payment.payment_date,
     payeeName: receipt.payee.name,
@@ -115,4 +116,3 @@ export default async function ReceiptDetailPage({ params }: PageProps) {
     </div>
   )
 }
-

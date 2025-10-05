@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 
 interface ReceiptPreviewProps {
   receiptData: {
+    receiptId: string
     receiptNumber: string
     paymentDate: string
     payeeName: string
@@ -185,10 +186,9 @@ export function ReceiptPreview({ receiptData }: ReceiptPreviewProps) {
          <EmailSendDialog
            open={emailDialogOpen}
            onOpenChange={setEmailDialogOpen}
-           receiptId={receiptData.receiptNumber}
+           receiptId={receiptData.receiptId}
            payeeName={receiptData.payeeName}
          />
        </div>
      )
    }
-
