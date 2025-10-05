@@ -17,6 +17,7 @@ interface ReceiptPreviewProps {
     receiptNumber: string
     paymentDate: string
     payeeName: string
+    payeeEmail?: string // 지급대상자 이메일 추가
     residentNumber: string
     address?: string
     paymentAmount: number
@@ -114,6 +115,12 @@ export function ReceiptPreview({ receiptData }: ReceiptPreviewProps) {
                 <span className="text-gray-600 dark:text-gray-400">주소</span>
                 <span className="col-span-2 text-gray-900 dark:text-gray-100">{receiptData.address || '-'}</span>
               </div>
+              {receiptData.payeeEmail && (
+                <div className="grid grid-cols-3">
+                  <span className="text-gray-600 dark:text-gray-400">이메일</span>
+                  <span className="col-span-2 text-gray-900 dark:text-gray-100">{receiptData.payeeEmail}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -188,6 +195,7 @@ export function ReceiptPreview({ receiptData }: ReceiptPreviewProps) {
            onOpenChange={setEmailDialogOpen}
            receiptId={receiptData.receiptId}
            payeeName={receiptData.payeeName}
+           payeeEmail={receiptData.payeeEmail} // 지급대상자 이메일 전달
          />
        </div>
      )

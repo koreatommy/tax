@@ -80,6 +80,7 @@ export default async function ReceiptDetailPage({ params }: PageProps) {
     receiptNumber: receipt.receipt_number,
     paymentDate: receipt.payment.payment_date,
     payeeName: receipt.payee.name,
+    payeeEmail: receipt.payee.email, // 지급대상자 이메일 추가
     residentNumber: receipt.payee.resident_number,
     address: receipt.payee.address,
     paymentAmount: receipt.payment.payment_amount,
