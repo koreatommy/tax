@@ -2,6 +2,9 @@
 
 개인 사업소득(3.3%) 원천징수를 관리하는 웹 애플리케이션입니다.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fkoreatommy%2Ftax)
+[![GitHub](https://img.shields.io/badge/GitHub-koreatommy%2Ftax-blue?logo=github)](https://github.com/koreatommy/tax)
+
 ## 🎉 프로젝트 현황
 
 ### ✅ 완료된 기능
@@ -272,10 +275,23 @@ npm run start
 
 ### Vercel 배포
 
-1. GitHub에 푸시
-2. Vercel과 연결
-3. 환경 변수 설정
-4. 자동 배포 완료!
+#### 원클릭 배포
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fkoreatommy%2Ftax)
+
+#### 수동 배포
+1. GitHub 저장소: https://github.com/koreatommy/tax
+2. Vercel Dashboard에서 Import
+3. 환경 변수 설정 (아래 참조)
+4. Deploy 클릭!
+
+**필수 환경 변수:**
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ENCRYPTION_SECRET_KEY`
+- `ADMIN_PASSWORD`
+
+자세한 배포 가이드는 [DEPLOYMENT.md](./DEPLOYMENT.md)를 참조하세요.
 
 ---
 
