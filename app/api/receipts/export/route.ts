@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import * as XLSX from 'xlsx'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient()
     
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
         if (!worksheet[cell_ref]) continue
 
         // 기본 스타일
-        const baseStyle: any = {}
+        const baseStyle: Record<string, unknown> = {}
 
         // 컬럼별 정렬 설정
         switch (C) {
