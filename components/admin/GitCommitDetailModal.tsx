@@ -97,22 +97,22 @@ export function GitCommitDetailModal({ isOpen, onClose, commitHash }: GitCommitD
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="max-w-4xl max-h-[80vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl relative z-[60]">
+        <DialogHeader className="bg-white dark:bg-gray-900">
+          <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
             <GitCommit className="h-5 w-5" />
             커밋 상세 정보
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[60vh] pr-4">
+        <ScrollArea className="max-h-[60vh] pr-4 bg-white dark:bg-gray-900">
           {loading ? (
-            <div className="text-center py-8">
+            <div className="text-center py-8 bg-white dark:bg-gray-900">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
               <p className="mt-2 text-gray-500 dark:text-gray-400">커밋 상세 정보를 불러오는 중...</p>
             </div>
           ) : commitDetail ? (
-            <div className="space-y-6">
+            <div className="space-y-6 bg-white dark:bg-gray-900">
               {/* 커밋 기본 정보 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                 <div className="flex items-center gap-2">
@@ -221,13 +221,13 @@ export function GitCommitDetailModal({ isOpen, onClose, commitHash }: GitCommitD
               </div>
             </div>
           ) : (
-            <div className="text-center py-8">
+            <div className="text-center py-8 bg-white dark:bg-gray-900">
               <p className="text-gray-500 dark:text-gray-400">커밋 상세 정보를 불러올 수 없습니다.</p>
             </div>
           )}
         </ScrollArea>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end bg-white dark:bg-gray-900 pt-4 border-t border-gray-200 dark:border-gray-700">
           <Button onClick={onClose} variant="outline">
             닫기
           </Button>
