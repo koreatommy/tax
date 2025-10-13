@@ -200,4 +200,52 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
+/**
+ * PATCH /api/admin/users - 사용자 비밀번호 변경 (관리자 전용)
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    // 관리자 세션 확인
+    const adminSession = request.cookies.get('admin_session')
+    if (adminSession?.value !== 'authenticated') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { user_id, new_password } = body
+
+    if (!user_id || !new_password) {
+      return NextResponse.json(
+        { error: '사용자 ID와 새 비밀번호가 필요합니다' },
+        { status: 400 }
+      )
+    }
+
+    // 비밀번호 길이 검증
+    if (new_password.length < 6) {
+      return NextResponse.json(
+        { error: '비밀번호는 최소 6자 이상이어야 합니다' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createAdminClient()
+
+    // Supabase Admin API를 사용하여 비밀번호 변경
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      user_id,
+      { password: new_password }
+    )
+
+    if (updateError) {
+      console.error('비밀번호 변경 오류:', updateError)
+      return NextResponse.json({ error: updateError.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, message: '비밀번호가 변경되었습니다' })
+  } catch (error) {
+    console.error('PATCH /api/admin/users error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
 

@@ -5,13 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Building, Save } from 'lucide-react'
+import { Building, Save, KeyRound } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 import { Company } from '@/types'
 import { validateBusinessNumber, formatBusinessNumber } from '@/lib/utils/validators'
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
   const [company, setCompany] = useState<Company | null>(null)
   const [formData, setFormData] = useState({
     business_number: '',
@@ -20,6 +22,11 @@ export default function SettingsPage() {
     address: '',
     contact: '',
     email: '',
+  })
+  const [passwordData, setPasswordData] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: '',
   })
 
   useEffect(() => {
@@ -91,6 +98,67 @@ export default function SettingsPage() {
     }
     
     setFormData({ ...formData, [e.target.name]: value })
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData({ ...passwordData, [e.target.name]: e.target.value })
+  }
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // 유효성 검증
+    if (!passwordData.current_password) {
+      toast.error('현재 비밀번호를 입력해주세요')
+      return
+    }
+
+    if (!passwordData.new_password || passwordData.new_password.length < 6) {
+      toast.error('새 비밀번호는 최소 6자 이상이어야 합니다')
+      return
+    }
+
+    if (passwordData.new_password !== passwordData.confirm_password) {
+      toast.error('새 비밀번호가 일치하지 않습니다')
+      return
+    }
+
+    if (passwordData.current_password === passwordData.new_password) {
+      toast.error('새 비밀번호는 현재 비밀번호와 달라야 합니다')
+      return
+    }
+
+    setPasswordLoading(true)
+
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          current_password: passwordData.current_password,
+          new_password: passwordData.new_password,
+        }),
+      })
+
+      const result = await res.json()
+
+      if (!res.ok) {
+        toast.error(result.error || '비밀번호 변경 실패')
+        return
+      }
+
+      toast.success('비밀번호가 변경되었습니다')
+      setPasswordData({
+        current_password: '',
+        new_password: '',
+        confirm_password: '',
+      })
+    } catch (error) {
+      toast.error('비밀번호 변경 중 오류가 발생했습니다')
+      console.error(error)
+    } finally {
+      setPasswordLoading(false)
+    }
   }
 
   return (
@@ -196,6 +264,101 @@ export default function SettingsPage() {
               <Button type="submit" disabled={loading}>
                 <Save className="mr-2 h-4 w-4" />
                 {loading ? '저장 중...' : company ? '수정' : '등록'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* 비밀번호 변경 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <KeyRound className="h-5 w-5" />
+            비밀번호 변경
+          </CardTitle>
+          <CardDescription>
+            계정의 비밀번호를 변경합니다
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current_password">
+                현재 비밀번호 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="current_password"
+                name="current_password"
+                type="password"
+                placeholder="현재 비밀번호를 입력하세요"
+                value={passwordData.current_password}
+                onChange={handlePasswordChange}
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label htmlFor="new_password">
+                새 비밀번호 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="new_password"
+                name="new_password"
+                type="password"
+                placeholder="새 비밀번호를 입력하세요 (최소 6자)"
+                value={passwordData.new_password}
+                onChange={handlePasswordChange}
+                autoComplete="new-password"
+                required
+              />
+              {passwordData.new_password && passwordData.new_password.length < 6 && (
+                <p className="text-sm text-red-600">
+                  비밀번호는 최소 6자 이상이어야 합니다
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirm_password">
+                새 비밀번호 확인 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="confirm_password"
+                name="confirm_password"
+                type="password"
+                placeholder="새 비밀번호를 다시 입력하세요"
+                value={passwordData.confirm_password}
+                onChange={handlePasswordChange}
+                autoComplete="new-password"
+                required
+              />
+              {passwordData.new_password && 
+               passwordData.confirm_password && 
+               passwordData.new_password !== passwordData.confirm_password && (
+                <p className="text-sm text-red-600">
+                  비밀번호가 일치하지 않습니다
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-end">
+              <Button 
+                type="submit" 
+                disabled={
+                  passwordLoading ||
+                  !passwordData.current_password ||
+                  !passwordData.new_password ||
+                  !passwordData.confirm_password ||
+                  passwordData.new_password !== passwordData.confirm_password ||
+                  passwordData.new_password.length < 6
+                }
+              >
+                <KeyRound className="mr-2 h-4 w-4" />
+                {passwordLoading ? '변경 중...' : '비밀번호 변경'}
               </Button>
             </div>
           </form>

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Mail, Calendar, Building2, Eye, Trash2, Edit, RefreshCw } from 'lucide-react'
+import { Mail, Calendar, Building2, Eye, Trash2, Edit, RefreshCw, KeyRound } from 'lucide-react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { toast } from 'sonner'
@@ -38,6 +38,7 @@ export default function AdminUsersPage() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [editForm, setEditForm] = useState({
     company_name: '',
     business_number: '',
@@ -46,6 +47,8 @@ export default function AdminUsersPage() {
     contact: '',
     email: '',
   })
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   useEffect(() => {
     fetchUsers()
@@ -133,6 +136,51 @@ export default function AdminUsersPage() {
       }
     } catch {
       toast.error('삭제 중 오류가 발생했습니다')
+    }
+  }
+
+  const handleChangePassword = (user: User) => {
+    setSelectedUser(user)
+    setNewPassword('')
+    setConfirmPassword('')
+    setShowPasswordModal(true)
+  }
+
+  const confirmChangePassword = async () => {
+    if (!selectedUser) return
+
+    // 비밀번호 검증
+    if (!newPassword || newPassword.length < 6) {
+      toast.error('비밀번호는 최소 6자 이상이어야 합니다')
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('비밀번호가 일치하지 않습니다')
+      return
+    }
+
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: selectedUser.id,
+          new_password: newPassword,
+        }),
+      })
+
+      if (res.ok) {
+        toast.success('비밀번호가 변경되었습니다')
+        setShowPasswordModal(false)
+        setNewPassword('')
+        setConfirmPassword('')
+      } else {
+        const data = await res.json()
+        toast.error(data.error || '비밀번호 변경에 실패했습니다')
+      }
+    } catch {
+      toast.error('비밀번호 변경 중 오류가 발생했습니다')
     }
   }
 
@@ -226,6 +274,14 @@ export default function AdminUsersPage() {
                             title="수정"
                           >
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleChangePassword(user)}
+                            variant="ghost"
+                            size="sm"
+                            title="비밀번호 변경"
+                          >
+                            <KeyRound className="h-4 w-4" />
                           </Button>
                           <Button
                             onClick={() => handleDeleteUser(user)}
@@ -447,6 +503,69 @@ export default function AdminUsersPage() {
             </Button>
             <Button onClick={confirmDeleteUser} variant="destructive">
               삭제
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 비밀번호 변경 모달 */}
+      <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
+        <DialogContent className="bg-white dark:bg-gray-950">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-50">비밀번호 변경</DialogTitle>
+            <DialogDescription className="text-gray-700 dark:text-gray-300">
+              {selectedUser?.email}의 비밀번호를 변경합니다
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="new_password" className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                새 비밀번호 *
+              </Label>
+              <Input
+                id="new_password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="최소 6자 이상"
+                className="mt-1 text-gray-900 dark:text-gray-100"
+                autoComplete="new-password"
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirm_password" className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                비밀번호 확인 *
+              </Label>
+              <Input
+                id="confirm_password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="비밀번호를 다시 입력하세요"
+                className="mt-1 text-gray-900 dark:text-gray-100"
+                autoComplete="new-password"
+              />
+            </div>
+            {newPassword && confirmPassword && newPassword !== confirmPassword && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                비밀번호가 일치하지 않습니다
+              </p>
+            )}
+            {newPassword && newPassword.length < 6 && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                비밀번호는 최소 6자 이상이어야 합니다
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowPasswordModal(false)} variant="outline">
+              취소
+            </Button>
+            <Button 
+              onClick={confirmChangePassword}
+              disabled={!newPassword || !confirmPassword || newPassword !== confirmPassword || newPassword.length < 6}
+            >
+              변경
             </Button>
           </DialogFooter>
         </DialogContent>
