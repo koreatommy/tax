@@ -7,6 +7,11 @@ export async function POST(request: NextRequest) {
   try {
     const { password } = await request.json()
 
+    // 디버깅용 로그
+    console.log('ADMIN_PASSWORD env:', process.env.ADMIN_PASSWORD)
+    console.log('ADMIN_PASSWORD const:', ADMIN_PASSWORD)
+    console.log('Input password:', password)
+
     if (!password) {
       return NextResponse.json(
         { error: '패스워드가 필요합니다' },
