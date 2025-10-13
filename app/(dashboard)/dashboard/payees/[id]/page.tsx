@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, Edit, Trash2, User, CreditCard, FileText, Calendar } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, User, CreditCard, FileText, Calendar, StickyNote } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/server'
@@ -226,6 +226,23 @@ export default async function PayeeDetailPage({ params }: PageProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* 관련정보 */}
+      {payee.notes && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <StickyNote className="h-5 w-5" />
+              관련정보
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+              {payee.notes}
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 지급 이력 (향후 구현) */}
       <Card>

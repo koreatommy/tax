@@ -123,6 +123,7 @@ export async function PUT(
       contract_end_date,
       contract_file_url,
       is_active,
+      notes,
     } = body
 
     // 계좌번호 암호화 (변경된 경우에만)
@@ -145,6 +146,7 @@ export async function PUT(
         contract_end_date,
         contract_file_url,
         is_active,
+        notes,
       })
       .eq('id', id)
       .select()

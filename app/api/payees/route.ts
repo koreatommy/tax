@@ -132,6 +132,7 @@ export async function POST(request: NextRequest) {
       contract_start_date,
       contract_end_date,
       contract_file_url,
+      notes,
     } = body
 
     // 필수 필드 검증
@@ -177,6 +178,7 @@ export async function POST(request: NextRequest) {
         contract_start_date,
         contract_end_date,
         contract_file_url,
+        notes,
       })
       .select()
       .single()

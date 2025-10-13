@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
@@ -33,6 +34,7 @@ export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
     business_type: payee?.business_type || '',
     contract_start_date: payee?.contract_start_date || '',
     contract_end_date: payee?.contract_end_date || '',
+    notes: payee?.notes || '',
   })
 
   // 수정 모드에서 기존 은행명이 리스트에 없는 경우 처리
@@ -263,6 +265,19 @@ export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
                 onChange={handleChange}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes">관련정보</Label>
+            <Textarea
+              id="notes"
+              name="notes"
+              placeholder="대상자 관련 추가 정보를 입력하세요"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              rows={4}
+            />
+            <p className="text-xs text-gray-500">대상자와 관련된 추가 정보나 메모를 입력할 수 있습니다</p>
           </div>
 
           <div className="flex justify-end gap-2">

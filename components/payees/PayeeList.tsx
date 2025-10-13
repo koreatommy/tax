@@ -99,6 +99,7 @@ export function PayeeList() {
                 <TableHead>주민번호</TableHead>
                 <TableHead>사업자 유형</TableHead>
                 <TableHead>연락처</TableHead>
+                <TableHead>관련정보</TableHead>
                 <TableHead>상태</TableHead>
                 <TableHead>등록일</TableHead>
                 <TableHead className="text-right">작업</TableHead>
@@ -115,6 +116,15 @@ export function PayeeList() {
                     <Badge variant="secondary">{payee.business_type}</Badge>
                   </TableCell>
                   <TableCell>{payee.contact || '-'}</TableCell>
+                  <TableCell className="max-w-xs">
+                    {payee.notes ? (
+                      <div className="truncate text-sm text-gray-600 dark:text-gray-400" title={payee.notes}>
+                        {payee.notes}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     {payee.is_active ? (
                       <Badge variant="default">활성</Badge>
