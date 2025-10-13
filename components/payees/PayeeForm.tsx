@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,8 @@ interface PayeeFormProps {
 export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [showCustomBankInput, setShowCustomBankInput] = useState(false)
+  const [customBankName, setCustomBankName] = useState('')
   const [formData, setFormData] = useState({
     name: payee?.name || '',
     resident_number: payee?.resident_number || '',
@@ -33,6 +35,15 @@ export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
     contract_end_date: payee?.contract_end_date || '',
   })
 
+  // 수정 모드에서 기존 은행명이 리스트에 없는 경우 처리
+  useEffect(() => {
+    if (payee && payee.bank_name && !BANKS.includes(payee.bank_name as any)) {
+      setFormData({ ...formData, bank_name: '기타(직접입력)' })
+      setCustomBankName(payee.bank_name)
+      setShowCustomBankInput(true)
+    }
+  }, [payee])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
@@ -45,10 +56,16 @@ export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
       const url = payee ? `/api/payees/${payee.id}` : '/api/payees'
       const method = payee ? 'PUT' : 'POST'
 
+      // 기타(직접입력) 선택 시 customBankName 사용
+      const submitData = {
+        ...formData,
+        bank_name: formData.bank_name === '기타(직접입력)' ? customBankName : formData.bank_name,
+      }
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       })
 
       const result = await res.json()
@@ -121,22 +138,20 @@ export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
             </div>
           </div>
 
-          {!payee && (
-            <div className="space-y-2">
-              <Label htmlFor="resident_number">
-                주민등록번호 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="resident_number"
-                name="resident_number"
-                placeholder="900101-1234567"
-                value={formData.resident_number}
-                onChange={handleChange}
-                required
-              />
-              <p className="text-xs text-gray-500">암호화되어 안전하게 저장됩니다</p>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="resident_number">
+              주민등록번호 <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="resident_number"
+              name="resident_number"
+              placeholder="900101-1234567"
+              value={formData.resident_number}
+              onChange={handleChange}
+              required
+            />
+            <p className="text-xs text-gray-500">암호화되어 안전하게 저장됩니다</p>
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="address">주소</Label>
@@ -184,7 +199,13 @@ export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
               <Select
                 name="bank_name"
                 value={formData.bank_name}
-                onValueChange={(value) => setFormData({ ...formData, bank_name: value })}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, bank_name: value })
+                  setShowCustomBankInput(value === '기타(직접입력)')
+                  if (value !== '기타(직접입력)') {
+                    setCustomBankName('')
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="은행을 선택하세요" />
@@ -197,6 +218,14 @@ export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
                   ))}
                 </SelectContent>
               </Select>
+              {showCustomBankInput && (
+                <Input
+                  id="custom_bank_name"
+                  placeholder="은행명을 입력하세요"
+                  value={customBankName}
+                  onChange={(e) => setCustomBankName(e.target.value)}
+                />
+              )}
             </div>
 
             <div className="space-y-2">

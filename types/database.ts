@@ -245,6 +245,38 @@ export type Database = {
           },
         ]
       }
+      memos: {
+        Row: {
+          id: string
+          company_id: string
+          content: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          content: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          content?: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memos_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -360,4 +392,8 @@ export type PaymentUpdate = TablesUpdate<"payments">
 export type Receipt = Tables<"receipts">
 export type ReceiptInsert = TablesInsert<"receipts">
 export type ReceiptUpdate = TablesUpdate<"receipts">
+
+export type Memo = Tables<"memos">
+export type MemoInsert = TablesInsert<"memos">
+export type MemoUpdate = TablesUpdate<"memos">
 

@@ -8,38 +8,80 @@ import { ROUTES } from '@/lib/constants'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
-
-// 임시 데이터
-const TEMP_PAYMENT = {
-  id: '1',
-  payment_date: '2024-10-01',
-  payment_amount: 1000000,
-  income_tax: 30000,
-  local_income_tax: 3000,
-  total_tax: 33000,
-  net_amount: 967000,
-  payment_reason: '2024년 9월 프로젝트 진행비',
-  receipt_issued: true,
-  receipt_issued_at: '2024-10-01T10:00:00Z',
-  created_at: '2024-10-01T09:00:00Z',
-  payee: {
-    id: '1',
-    name: '김철수',
-    business_type: 'FREELANCER',
-    contact: '010-1234-5678',
-    bank_name: 'KB국민은행',
-    account_number_encrypted: '1234-56-*******',
-  },
-}
+import { createClient } from '@/lib/supabase/server'
+import { notFound, redirect } from 'next/navigation'
+import { decrypt } from '@/lib/utils/encryption'
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
 export default async function PaymentDetailPage({ params }: PageProps) {
-  const { } = await params
-  // TODO: Supabase에서 데이터 가져오기
-  const payment = TEMP_PAYMENT
+  const { id } = await params
+  const supabase = await createClient()
+  
+  // 인증 확인
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    redirect('/login')
+  }
+
+  // 지급 내역 조회 (지급대상자 정보 포함)
+  const { data: paymentData, error } = await supabase
+    .from('payments')
+    .select(`
+      *,
+      payee:payees!inner(
+        id,
+        name,
+        business_type,
+        contact,
+        bank_name,
+        account_number_encrypted
+      ),
+      company:companies!inner(user_id)
+    `)
+    .eq('id', id)
+    .single()
+
+  if (error || !paymentData) {
+    notFound()
+  }
+
+  // 권한 확인 (자신의 회사 소속인지)
+  if (paymentData.company.user_id !== user.id) {
+    notFound()
+  }
+
+  // 계좌번호 복호화 (마스킹 처리)
+  let accountNumber = '-'
+  if (paymentData.payee.account_number_encrypted) {
+    try {
+      if (paymentData.payee.account_number_encrypted.startsWith('ENCRYPTED_')) {
+        accountNumber = paymentData.payee.account_number_encrypted.replace('ENCRYPTED_', '')
+      } else if (paymentData.payee.account_number_encrypted.startsWith('ENC_')) {
+        accountNumber = paymentData.payee.account_number_encrypted.replace('ENC_', '')
+      } else {
+        const decrypted = decrypt(paymentData.payee.account_number_encrypted)
+        // 계좌번호 마스킹 (뒤 4자리만 마스킹)
+        if (decrypted && decrypted.length > 4) {
+          accountNumber = decrypted.slice(0, -4) + '****'
+        } else {
+          accountNumber = decrypted
+        }
+      }
+    } catch (e) {
+      accountNumber = '****'
+    }
+  }
+
+  const payment = {
+    ...paymentData,
+    payee: {
+      ...paymentData.payee,
+      account_number_display: accountNumber,
+    },
+  }
 
   return (
     <div className="space-y-6">
@@ -150,7 +192,7 @@ export default async function PaymentDetailPage({ params }: PageProps) {
             <div>
               <label className="text-sm font-medium text-gray-600">계좌정보</label>
               <p className="mt-1">
-                {payment.payee.bank_name} {payment.payee.account_number_encrypted || '-'}
+                {payment.payee.bank_name || '-'} {payment.payee.account_number_display}
               </p>
             </div>
             

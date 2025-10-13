@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, CreditCard, FileText, TrendingUp } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
 import { Payment } from '@/types'
+import { MemoList } from '@/components/memos/MemoList'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -155,6 +156,9 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 메모 */}
+      <MemoList />
 
       {/* 시작 가이드 */}
       <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800">
