@@ -72,7 +72,7 @@ Vercel Dashboard → 프로젝트 → **Settings** → **Environment Variables**
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbG...` | Supabase Anon Key |
 | `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbG...` | Supabase Service Role Key |
 | `ENCRYPTION_SECRET_KEY` | `8qENs/PdGf...` | AES-256 암호화 키 |
-| `ADMIN_PASSWORD` | `admin123` | 관리자 비밀번호 |
+| `ADMIN_PASSWORD` | `admin123!@#` | 관리자 비밀번호 (기본값) |
 | `NEXT_PUBLIC_APP_URL` | `https://your-app.vercel.app` | 배포된 앱 URL |
 | `NODE_ENV` | `production` | 환경 설정 |
 
