@@ -97,7 +97,9 @@ export function GitCommitDetailModal({ isOpen, onClose, commitHash }: GitCommitD
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl relative z-[60]">
+      <DialogContent 
+        className="max-w-4xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl relative z-[60] !fixed !top-[5vh] !left-[50%] !translate-x-[-50%] !translate-y-0 max-h-[90vh] overflow-hidden"
+      >
         <DialogHeader className="bg-white dark:bg-gray-900">
           <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
             <GitCommit className="h-5 w-5" />
@@ -105,7 +107,7 @@ export function GitCommitDetailModal({ isOpen, onClose, commitHash }: GitCommitD
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[60vh] pr-4 bg-white dark:bg-gray-900">
+        <ScrollArea className="max-h-[70vh] pr-4 bg-white dark:bg-gray-900">
           {loading ? (
             <div className="text-center py-8 bg-white dark:bg-gray-900">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
@@ -114,33 +116,51 @@ export function GitCommitDetailModal({ isOpen, onClose, commitHash }: GitCommitD
           ) : commitDetail ? (
             <div className="space-y-6 bg-white dark:bg-gray-900">
               {/* 커밋 기본 정보 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Hash className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium">커밋 해시</span>
-                  <code className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                    {commitDetail.hash}
-                  </code>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium">작성자</span>
-                  <span className="text-sm">{commitDetail.author}</span>
+              <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                {/* 첫 번째 행: 커밋 해시와 짧은 해시 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Hash className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium">커밋 해시</span>
+                    </div>
+                    <code className="block text-xs bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded font-mono break-all">
+                      {commitDetail.hash}
+                    </code>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <GitCommit className="h-4 w-4 text-orange-600" />
+                      <span className="text-sm font-medium">짧은 해시</span>
+                    </div>
+                    <code className="block text-xs bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded font-mono">
+                      {commitDetail.shortHash}
+                    </code>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-purple-600" />
-                  <span className="text-sm font-medium">날짜</span>
-                  <span className="text-sm">{formatCommitDate(commitDetail.date)}</span>
-                </div>
+                {/* 두 번째 행: 작성자와 날짜 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-medium">작성자</span>
+                    </div>
+                    <span className="block text-sm text-gray-900 dark:text-gray-100 font-medium">
+                      {commitDetail.author}
+                    </span>
+                  </div>
 
-                <div className="flex items-center gap-2">
-                  <GitCommit className="h-4 w-4 text-orange-600" />
-                  <span className="text-sm font-medium">짧은 해시</span>
-                  <code className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                    {commitDetail.shortHash}
-                  </code>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm font-medium">날짜</span>
+                    </div>
+                    <span className="block text-sm text-gray-900 dark:text-gray-100">
+                      {formatCommitDate(commitDetail.date)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
