@@ -57,7 +57,7 @@ export function MemoList() {
 
   useEffect(() => {
     fetchMemos()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 메모 추가
   const handleAddMemo = async (e: React.FormEvent) => {
@@ -90,9 +90,10 @@ export function MemoList() {
       setNewMemo('')
       await fetchMemos(1) // 첫 페이지로 이동
       setPage(1)
-    } catch (error: any) {
+    } catch (error) {
       console.error('메모 추가 오류:', error)
-      toast.error(error.message || '메모 추가에 실패했습니다')
+      const errorMessage = error instanceof Error ? error.message : '메모 추가에 실패했습니다'
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -139,9 +140,10 @@ export function MemoList() {
       setEditingId(null)
       setEditContent('')
       await fetchMemos()
-    } catch (error: any) {
+    } catch (error) {
       console.error('메모 수정 오류:', error)
-      toast.error(error.message || '메모 수정에 실패했습니다')
+      const errorMessage = error instanceof Error ? error.message : '메모 수정에 실패했습니다'
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -170,9 +172,10 @@ export function MemoList() {
       const newPage = memos.length === 1 && page > 1 ? page - 1 : page
       await fetchMemos(newPage)
       setPage(newPage)
-    } catch (error: any) {
+    } catch (error) {
       console.error('메모 삭제 오류:', error)
-      toast.error(error.message || '메모 삭제에 실패했습니다')
+      const errorMessage = error instanceof Error ? error.message : '메모 삭제에 실패했습니다'
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }

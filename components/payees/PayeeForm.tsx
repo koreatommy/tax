@@ -37,8 +37,8 @@ export function PayeeForm({ payee, onSuccess }: PayeeFormProps) {
 
   // 수정 모드에서 기존 은행명이 리스트에 없는 경우 처리
   useEffect(() => {
-    if (payee && payee.bank_name && !BANKS.includes(payee.bank_name as any)) {
-      setFormData({ ...formData, bank_name: '기타(직접입력)' })
+    if (payee && payee.bank_name && !BANKS.includes(payee.bank_name as (typeof BANKS)[number])) {
+      setFormData(prev => ({ ...prev, bank_name: '기타(직접입력)' }))
       setCustomBankName(payee.bank_name)
       setShowCustomBankInput(true)
     }

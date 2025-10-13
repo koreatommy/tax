@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Building2, CreditCard, FileText, TrendingUp, Activity } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
+import { GitCommitList } from '@/components/admin/GitCommitList'
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
@@ -204,6 +205,9 @@ export default function AdminDashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Git 커밋 현황 */}
+      <GitCommitList />
     </div>
   )
 }

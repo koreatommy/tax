@@ -70,7 +70,7 @@ export default async function PaymentDetailPage({ params }: PageProps) {
           accountNumber = decrypted
         }
       }
-    } catch (e) {
+    } catch {
       accountNumber = '****'
     }
   }
