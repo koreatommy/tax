@@ -73,12 +73,13 @@ export async function GET() {
     )
 
     let currentBranch = 'main'
-    let lastCommit = commits[0]
 
     if (branchResponse.ok) {
       const repoData = await branchResponse.json()
       currentBranch = repoData.default_branch || 'main'
     }
+
+    const lastCommit = commits[0]
 
     return NextResponse.json({
       data: {
