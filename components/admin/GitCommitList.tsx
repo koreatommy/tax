@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { GitCommit, GitBranch, Clock, User, RefreshCw } from 'lucide-react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
+import { GitCommitDetailModal } from './GitCommitDetailModal'
 
 interface GitCommit {
   hash: string
@@ -35,6 +36,8 @@ export function GitCommitList() {
   const [gitData, setGitData] = useState<GitCommitsResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [selectedCommitHash, setSelectedCommitHash] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Git 커밋 현황 조회
   const fetchGitCommits = async () => {
@@ -81,6 +84,18 @@ export function GitCommitList() {
     if (message.startsWith('docs:')) return { type: 'docs', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' }
     if (message.startsWith('chore:')) return { type: 'chore', color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300' }
     return { type: 'commit', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300' }
+  }
+
+  // 커밋 상세 정보 모달 열기
+  const handleCommitClick = (hash: string) => {
+    setSelectedCommitHash(hash)
+    setIsModalOpen(true)
+  }
+
+  // 모달 닫기
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setSelectedCommitHash(null)
   }
 
   if (!gitData) {
@@ -165,7 +180,8 @@ export function GitCommitList() {
             return (
               <div
                 key={commit.hash}
-                className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                onClick={() => handleCommitClick(commit.hash)}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -199,9 +215,18 @@ export function GitCommitList() {
 
         {/* 자동 업데이트 안내 */}
         <div className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2 border-t">
-          💡 30초마다 자동으로 업데이트됩니다
+          💡 30초마다 자동으로 업데이트됩니다 • 클릭하면 상세 정보를 볼 수 있습니다
         </div>
       </CardContent>
+
+      {/* 커밋 상세 정보 모달 */}
+      {selectedCommitHash && (
+        <GitCommitDetailModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          commitHash={selectedCommitHash}
+        />
+      )}
     </Card>
   )
 }
