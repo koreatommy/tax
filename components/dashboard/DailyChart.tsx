@@ -38,12 +38,16 @@ export function DailyChart({ data, chartType = 'area' }: DailyChartProps) {
     }))
   }, [data])
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: {
+    active?: boolean
+    payload?: Array<{ name: string; value: number; color: string }>
+    label?: string
+  }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
           <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: {entry.name.includes('액') ? `${formatCurrency(entry.value * 10000)}` : `${entry.value}건`}
             </p>

@@ -2,7 +2,7 @@
  * 통계 계산 유틸리티 함수
  */
 
-import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import { format, subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { Payment } from '@/types'
 
 /**
