@@ -1,11 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, CreditCard, FileText, TrendingUp } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
 import { Payment } from '@/types'
 import { MemoList } from '@/components/memos/MemoList'
+import { MonthlyChart } from '@/components/dashboard/MonthlyChart'
+import { DailyChart } from '@/components/dashboard/DailyChart'
+import { StatsToggle, ViewType, ChartType } from '@/components/dashboard/StatsToggle'
+import { calculateDailyStats, calculateMonthlyStats } from '@/lib/utils/stats-calculator'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -15,7 +19,13 @@ export default function DashboardPage() {
     totalAmount: 0,
     totalTax: 0,
   })
+  const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
+
+  // 차트 설정 상태
+  const [viewType, setViewType] = useState<ViewType>('monthly')
+  const [chartType, setChartType] = useState<ChartType>('bar')
+  const [period, setPeriod] = useState<number>(6) // 기본값: 월별 6개월
 
   useEffect(() => {
     fetchDashboardStats()
@@ -35,13 +45,14 @@ export default function DashboardPage() {
         receiptsRes.json(),
       ])
 
-      const payments = paymentsData.data || []
-      const totalAmount = payments.reduce((sum: number, p: Payment) => sum + (p.payment_amount || 0), 0)
-      const totalTax = payments.reduce((sum: number, p: Payment) => sum + (p.total_tax || 0), 0)
+      const paymentsArray = paymentsData.data || []
+      const totalAmount = paymentsArray.reduce((sum: number, p: Payment) => sum + (p.payment_amount || 0), 0)
+      const totalTax = paymentsArray.reduce((sum: number, p: Payment) => sum + (p.total_tax || 0), 0)
 
+      setPayments(paymentsArray)
       setStats({
         payees: payeesData.data?.length || 0,
-        payments: payments.length,
+        payments: paymentsArray.length,
         receipts: receiptsData.data?.length || 0,
         totalAmount,
         totalTax,
@@ -50,6 +61,22 @@ export default function DashboardPage() {
       console.error('Dashboard stats fetch error:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 일별/월별 통계 계산
+  const dailyStats = useMemo(() => calculateDailyStats(payments, period), [payments, period])
+  const monthlyStats = useMemo(() => calculateMonthlyStats(payments, period), [payments, period])
+
+  // ViewType 변경 시 기본 기간 및 차트 타입 설정
+  const handleViewTypeChange = (type: ViewType) => {
+    setViewType(type)
+    if (type === 'daily') {
+      setPeriod(30) // 일별 기본값: 30일
+      setChartType('area') // 일별 기본 차트: area
+    } else {
+      setPeriod(6) // 월별 기본값: 6개월
+      setChartType('bar') // 월별 기본 차트: bar
     }
   }
 
@@ -126,6 +153,30 @@ export default function DashboardPage() {
             </Card>
           )
         })}
+      </div>
+
+      {/* 통계 그래프 섹션 */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">지급관리 통계</h2>
+        </div>
+
+        {/* 차트 설정 토글 */}
+        <StatsToggle
+          viewType={viewType}
+          onViewTypeChange={handleViewTypeChange}
+          chartType={chartType}
+          onChartTypeChange={setChartType}
+          period={period}
+          onPeriodChange={setPeriod}
+        />
+
+        {/* 차트 렌더링 */}
+        {viewType === 'daily' ? (
+          <DailyChart data={dailyStats} chartType={chartType as 'area' | 'line'} />
+        ) : (
+          <MonthlyChart data={monthlyStats} chartType={chartType as 'bar' | 'line'} />
+        )}
       </div>
 
       {/* 세액 요약 */}
