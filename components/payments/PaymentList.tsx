@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Plus, Trash2, FileText, X, Eye } from 'lucide-react'
+import { Search, Plus, Trash2, FileText, X, Eye, Calculator } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
@@ -128,6 +129,18 @@ export function PaymentList() {
     })
   }, [payments, selectedMonth, searchName, searchReason])
 
+  // 필터링된 리스트의 합산 계산
+  const summary = useMemo(() => {
+    return filteredPayments.reduce(
+      (acc, payment) => ({
+        totalPaymentAmount: acc.totalPaymentAmount + (payment.payment_amount || 0),
+        totalTax: acc.totalTax + (payment.total_tax || 0),
+        totalNetAmount: acc.totalNetAmount + (payment.net_amount || 0),
+      }),
+      { totalPaymentAmount: 0, totalTax: 0, totalNetAmount: 0 }
+    )
+  }, [filteredPayments])
+
   // 필터 초기화
   const handleResetFilters = () => {
     setSelectedMonth('all')
@@ -217,6 +230,40 @@ export function PaymentList() {
           </Button>
         )}
       </div>
+
+      {/* 합산 정보 */}
+      {filteredPayments.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Calculator className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                검색 결과 합계
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">지급액 합계</div>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-mono">
+                  {formatCurrency(summary.totalPaymentAmount)}
+                </div>
+              </div>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">세액 합계</div>
+                <div className="text-2xl font-bold text-red-600 dark:text-red-400 font-mono">
+                  {formatCurrency(summary.totalTax)}
+                </div>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">실지급액 합계</div>
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400 font-mono">
+                  {formatCurrency(summary.totalNetAmount)}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 테이블 */}
       {filteredPayments.length === 0 ? (
