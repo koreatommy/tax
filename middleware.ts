@@ -4,6 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // admin-login 페이지는 항상 접근 허용 (인증 체크 전에 먼저 처리)
+  if (pathname.startsWith('/admin-login')) {
+    return NextResponse.next()
+  }
+
   // 인증이 필요 없는 경로
   const publicPaths = ['/login', '/register', '/admin-login']
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path))
@@ -15,8 +20,12 @@ export async function middleware(request: NextRequest) {
   const isAdminPath = pathname.startsWith('/admin')
   const adminSession = request.cookies.get('admin_session')
 
-  // admin-login 페이지는 항상 접근 허용
-  if (pathname.startsWith('/admin-login')) {
+  // 관리자 경로는 관리자 세션만 확인 (Supabase 사용자 인증 불필요)
+  if (isAdminPath) {
+    if (adminSession?.value !== 'authenticated') {
+      return NextResponse.redirect(new URL('/admin-login', request.url))
+    }
+    // 관리자 세션이 있으면 접근 허용
     return NextResponse.next()
   }
 
@@ -26,13 +35,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // 미인증 사용자가 보호된 경로에 접근하면 로그인 페이지로 리다이렉트
-  if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
+  if (!user && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/login', request.url))
-  }
-
-  // 관리자 경로에 접근하는데 관리자 세션이 없는 경우
-  if (isAdminPath && adminSession?.value !== 'authenticated') {
-    return NextResponse.redirect(new URL('/admin-login', request.url))
   }
 
   return NextResponse.next()

@@ -32,7 +32,10 @@ export default function AdminLoginPage() {
 
       if (response.ok) {
         toast.success('관리자 인증 성공!')
-        router.push('/admin/dashboard')
+        // 페이지 새로고침 후 리다이렉트하여 미들웨어가 관리자 세션을 인식하도록 함
+        setTimeout(() => {
+          window.location.href = '/admin/dashboard'
+        }, 500)
       } else {
         toast.error(data.error || '패스워드가 올바르지 않습니다')
       }
