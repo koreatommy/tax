@@ -7,6 +7,7 @@ import {
   Users, 
   CreditCard, 
   FileText,
+  ClipboardList,
   Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -27,6 +28,11 @@ const navigation = [
     name: '지급 관리',
     href: ROUTES.PAYMENTS.LIST,
     icon: CreditCard,
+  },
+  {
+    name: '세금신고',
+    href: ROUTES.TAX_REPORTS,
+    icon: ClipboardList,
   },
   {
     name: '원천징수영수증',

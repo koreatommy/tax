@@ -42,6 +42,7 @@ export const ROUTES = {
     BULK: '/dashboard/payments/bulk',
     DETAIL: (id: string) => `/dashboard/payments/${id}`,
   },
+  TAX_REPORTS: '/dashboard/tax-reports',
   RECEIPTS: {
     LIST: '/dashboard/receipts',
     GENERATE: '/dashboard/receipts/generate',
