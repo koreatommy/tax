@@ -3,24 +3,29 @@
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Plus, Trash2, FileText, X, Eye, Calculator } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Plus, Trash2, FileText, Eye, CreditCard } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { formatCurrency } from '@/lib/utils/tax-calculator'
 import { Payment } from '@/types'
+import { PaymentFilters } from './PaymentFilters'
+import { PaymentSummaryCard } from './PaymentSummaryCard'
+import { PayeeAccountDialog, type PayeeAccountTarget } from './PayeeAccountDialog'
+
+type PaymentWithPayee = Payment & {
+  payee?: { name: string; business_type: string; bank_name: string | null }
+}
 
 export function PaymentList() {
-  const [payments, setPayments] = useState<(Payment & { payee?: { name: string, business_type: string } })[]>([])
+  const [payments, setPayments] = useState<PaymentWithPayee[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedMonth, setSelectedMonth] = useState<string>('all')
   const [searchName, setSearchName] = useState('')
   const [searchReason, setSearchReason] = useState('')
+  const [accountTarget, setAccountTarget] = useState<PayeeAccountTarget | null>(null)
 
   useEffect(() => {
     fetchPayments()
@@ -148,8 +153,6 @@ export function PaymentList() {
     setSearchReason('')
   }
 
-  const hasActiveFilters = selectedMonth !== 'all' || searchName !== '' || searchReason !== ''
-
   if (loading) {
     return <div className="text-center py-8">로딩 중...</div>
   }
@@ -169,101 +172,18 @@ export function PaymentList() {
         </Link>
       </div>
 
-      {/* 필터 영역 */}
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-        {/* 월별 필터 */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">지급월:</span>
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="전체" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">전체</SelectItem>
-              {monthOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <PaymentFilters
+        monthOptions={monthOptions}
+        selectedMonth={selectedMonth}
+        searchName={searchName}
+        searchReason={searchReason}
+        onMonthChange={setSelectedMonth}
+        onNameChange={setSearchName}
+        onReasonChange={setSearchReason}
+        onReset={handleResetFilters}
+      />
 
-        {/* 대상자 검색 */}
-        <div className="flex items-center gap-2 flex-1 min-w-[160px]">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">대상자:</span>
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="이름으로 검색..."
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        </div>
-
-        {/* 지급사유 검색 */}
-        <div className="flex items-center gap-2 flex-1 min-w-[160px]">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">지급사유:</span>
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="지급사유 검색..."
-              value={searchReason}
-              onChange={(e) => setSearchReason(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        </div>
-
-        {/* 필터 초기화 버튼 */}
-        {hasActiveFilters && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleResetFilters}
-            className="whitespace-nowrap"
-          >
-            <X className="h-4 w-4 mr-1" />
-            초기화
-          </Button>
-        )}
-      </div>
-
-      {/* 합산 정보 */}
-      {filteredPayments.length > 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Calculator className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                검색 결과 합계
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">지급액 합계</div>
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-mono">
-                  {formatCurrency(summary.totalPaymentAmount)}
-                </div>
-              </div>
-              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">세액 합계</div>
-                <div className="text-2xl font-bold text-red-600 dark:text-red-400 font-mono">
-                  {formatCurrency(summary.totalTax)}
-                </div>
-              </div>
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">실지급액 합계</div>
-                <div className="text-2xl font-bold text-green-600 dark:text-green-400 font-mono">
-                  {formatCurrency(summary.totalNetAmount)}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {filteredPayments.length > 0 && <PaymentSummaryCard {...summary} />}
 
       {/* 테이블 */}
       {filteredPayments.length === 0 ? (
@@ -281,6 +201,7 @@ export function PaymentList() {
                 <TableHead>지급액</TableHead>
                 <TableHead>세액</TableHead>
                 <TableHead>실지급액</TableHead>
+                <TableHead>계좌번호</TableHead>
                 <TableHead>영수증</TableHead>
                 <TableHead className="text-right">작업</TableHead>
               </TableRow>
@@ -310,6 +231,23 @@ export function PaymentList() {
                   </TableCell>
                   <TableCell className="font-mono font-semibold">
                     {formatCurrency(payment.net_amount)}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setAccountTarget({
+                          payeeId: payment.payee_id,
+                          payeeName: payment.payee?.name ?? '',
+                          paymentDate: payment.payment_date,
+                          netAmount: payment.net_amount,
+                        })
+                      }
+                    >
+                      <CreditCard className="h-3 w-3 mr-1" />
+                      {payment.payee?.bank_name || '계좌 보기'}
+                    </Button>
                   </TableCell>
                   <TableCell>
                     {payment.receipt_issued ? (
@@ -347,6 +285,8 @@ export function PaymentList() {
           </Table>
         </div>
       )}
+
+      <PayeeAccountDialog target={accountTarget} onClose={() => setAccountTarget(null)} />
     </div>
   )
 }

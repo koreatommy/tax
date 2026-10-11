@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       .from('payments')
       .select(`
         *,
-        payee:payees(id, name, business_type)
+        payee:payees(id, name, business_type, bank_name)
       `)
       .eq('company_id', company.id)
       .order('payment_date', { ascending: false })

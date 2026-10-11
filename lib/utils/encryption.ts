@@ -65,6 +65,20 @@ export function decrypt(encryptedText: string): string {
   }
 }
 
+const LEGACY_PLAIN_PREFIXES = ['ENCRYPTED_', 'ENC_']
+
+/**
+ * DB에 저장된 값을 원문으로 변환합니다 (시드 데이터의 평문 접두사 형식 포함)
+ */
+export function decryptStoredValue(storedValue: string | null): string | null {
+  if (!storedValue) return null
+
+  const prefix = LEGACY_PLAIN_PREFIXES.find((p) => storedValue.startsWith(p))
+  if (prefix) return storedValue.slice(prefix.length)
+
+  return decrypt(storedValue)
+}
+
 /**
  * 주민번호 유효성 검증
  */
