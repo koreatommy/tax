@@ -134,14 +134,17 @@ tax-app/
 
 ## 🚀 시작하기
 
+**클론 후 로컬에서 바로 실행하려면** → [docs/LOCAL_SETUP.md](./docs/LOCAL_SETUP.md) 참고.
+
 ### 1. 환경 변수 설정
 
-`.env.local` 파일이 이미 생성되어 있습니다:
+`.env.local` 파일을 생성한 뒤 아래 항목을 채우세요 (Supabase 대시보드 → Settings → API에서 확인):
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://qbpwxjullgynxpswquzb.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-ENCRYPTION_SECRET_KEY=your-encryption-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+ENCRYPTION_SECRET_KEY=your-base64-32-byte-key   # node -e "console.log(require('crypto').randomBytes(32).toString('base64'))" 로 생성
 ```
 
 ### 2. 개발 서버 실행
